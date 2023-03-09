@@ -4,9 +4,12 @@ import org.houri.QuickPoll.domain.Poll;
 import org.houri.QuickPoll.exceptions.ResourceNotFoundException;
 import org.houri.QuickPoll.repository.PollRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -30,9 +33,9 @@ public class PollController {
 
 
     @GetMapping("/polls")
-    public ResponseEntity<Iterable<Poll>> getAllPolls(){
-        Iterable<Poll> allPolls = pollRepository.findAll();
-        return new ResponseEntity<>(pollRepository.findAll(), HttpStatus.OK);
+    public ResponseEntity<Page<Poll>> getAllPolls(Pageable pageable){
+        Page<Poll> allPolls = pollRepository.findAll(pageable);
+        return new ResponseEntity(pollRepository.findAll(), HttpStatus.OK);
     }
 
     @GetMapping("/polls/{pollId}")
@@ -64,6 +67,7 @@ public class PollController {
     }
 
     @DeleteMapping("/polls/{pollId}")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<?> deletePoll(@PathVariable Long pollId) {
         pollRepository.deleteById(pollId);
         return new ResponseEntity<>(HttpStatus.OK);
